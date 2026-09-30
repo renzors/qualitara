@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relay Scorecard · Metro Collision</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="scorecard.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">Relay <span>Scorecard</span></div>
+    <div class="crumbs"><a href="portfolio.html">All accounts</a> / Metro Collision Centers</div>
+    <div class="ctlrow">
+      <label for="asof">As of <input class="date mono" id="asof" type="text" value="2026-07-27 22:20 UTC" aria-label="As of date"></label>
+      <div class="seg" role="group" aria-label="Window"><button type="button">1d</button><button type="button" aria-pressed="true">7d</button><button type="button">30d</button></div>
+      <div class="seg" role="group" aria-label="Sensitivity"><button type="button">Relaxed</button><button type="button" aria-pressed="true">Normal</button><button type="button">Strict</button></div>
+    </div>
+  </header>
+
+  <div class="summary">
+    <span class="verdict" data-v="look">Worth a look</span>
+    <h1>Metro Collision Centers</h1>
+    <div class="counts"><span>Automotive Services</span><span><b>15</b> locations</span><span>New York time · Jul 20, 6:20pm – Jul 27, 6:20pm</span></div>
+  </div>
+
+  <section>
+    <h2>Signals <small>weekly history · shaded band = usual range over the 8 baseline weeks · dot = this week</small></h2>
+    <div class="ledger" id="ledger">
+      <div class="lrow h"><span>Signal</span><span>Last 25 weeks</span><span>This week</span><span>Usual</span><span>Distance from usual</span></div>
+    </div>
+  </section>
+
+  <div class="cols">
+    <section>
+      <h2>Locations × signals <small>outcome rates need 10+ events per site, so most are blank</small></h2>
+      <div class="gridwrap"><table class="m" id="sites">
+        <thead><tr><th>Site</th><th>Verdict</th><th style="text-align:right">All</th><th style="text-align:right">Calls</th><th style="text-align:right">Leads</th><th style="text-align:right">Appts</th><th class="sep" style="text-align:right">Odd hours</th></tr></thead>
+        <tbody></tbody></table></div>
+    </section>
+    <section>
+      <h2>Data quality</h2>
+      <dl class="dq"><dt>Duplicates removed</dt><dt>No outcome</dt><dt>No call duration</dt><dd>4</dd><dd>6% of events</dd><dd>4% of calls</dd></dl>
+      <p class="note">The 805-event day on Jun 3 sits outside the current baseline. When it is inside, the median-based range ignores it, so it doesn't hide later changes.</p>
+      <h2 style="margin-top:20px">Unusual hours <small>8pm – 3am New York time</small></h2>
+      <p class="note">1 of 81 events this week (1%). Usually 2%.</p>
+    </section>
+  </div>
+</div>
+<script src="../data.js"></script>
+<script>
+(function () {
+  const D = window.RELAY, M = D.metro, A = D.accounts.find(a => a.id === 6);
+  const pol = { 'Total events': 1, 'Calls': 1, 'Leads': 1, 'Appointments': 1, 'Missed-call rate': -1, 'Lead conversion': 1, 'No-show rate': -1, 'Median talk time': 0, 'Off-hours share': 0 };
+  const key = { 'Total events': 'all', 'Calls': 'calls', 'Leads': 'leads', 'Appointments': 'appts', 'Missed-call rate': 'missed', 'Lead conversion': 'conv', 'No-show rate': 'noshow', 'Median talk time': 'talk', 'Off-hours share': 'off' };
+  const nice = { 'Total events': 'All activity', 'Off-hours share': 'Activity at unusual hours', 'Median talk time': 'Median talk time (connected)' };
+  const unit = { 'Missed-call rate': 'calls with an outcome', 'Lead conversion': 'of leads with an outcome', 'No-show rate': 'of appointments', 'Median talk time': 'seconds', 'Off-hours share': 'of events' };
+  const colorFor = m => { const d = Math.sign(m.z) * pol[m.name]; return d > 0 ? 'var(--good)' : d < 0 ? 'var(--bad)' : 'var(--neutral)'; };
+  const toNum = s => s.includes('m ') ? (+s.split('m ')[0] * 60 + parseInt(s.split('m ')[1])) : parseFloat(s);
+
+  const spark = (series, m) => {
+    const W = 300, H = 40, n = series.length;
+    const sorted = series.slice().sort((a, b) => a - b), medv = sorted[n >> 1];
+    const cap = Math.max(medv * 2.2, toNum(m.hi) * 1.1, 1);
+    const x = i => 2 + i * (W - 4) / (n - 1), y = v => H - 3 - Math.min(v, cap) / cap * (H - 8);
+    const lo = toNum(m.lo), hi = toNum(m.hi);
+    let pts = series.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+    let clip = '';
+    series.forEach((v, i) => { if (v > cap) clip += `<text x="${x(i) + 4}" y="9" style="fill:var(--muted);font:10px var(--font-data)">${v} ↑ incl. Jun 3 spike</text><path d="M${x(i) - 3},4 l3,-3 l3,3" style="fill:none;stroke:var(--muted)"/>`; });
+    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${m.name} weekly">
+      <rect x="${x(n - 9)}" width="${x(n - 2) - x(n - 9)}" y="${y(hi)}" height="${Math.max(1, y(lo) - y(hi))}" style="fill:color-mix(in srgb, var(--accent) 14%, transparent)"/>
+      <polyline points="${pts}" vector-effect="non-scaling-stroke" style="fill:none;stroke:var(--muted);stroke-width:1.2"/>
+      <circle cx="${x(n - 1)}" cy="${y(series[n - 1])}" r="3.5" vector-effect="non-scaling-stroke" style="fill:${m.status === 'normal' ? 'var(--ink)' : colorFor(m)}"/>${clip}</svg>`;
+  };
+  const zbar = m => {
+    const pct = z => 50 + Math.max(-5, Math.min(5, z)) * 10;
+    const l = Math.min(pct(0), pct(m.z)), w = Math.abs(pct(m.z) - pct(0));
+    const ticks = [-3, -2, 2, 3].map(t => `<span class="tick ${Math.abs(t) === 3 ? 't3' : ''}" style="left:${pct(t)}%"></span>`).join('');
+    const lab = m.z >= 0 ? `left:calc(${pct(m.z)}% + 4px)` : `right:calc(${100 - pct(m.z)}% + 4px)`;
+    return `<div class="zbar" style="--pc:${colorFor(m)}"><span class="axis"></span>${ticks}<span class="tick t3" style="left:50%;background:var(--ink)"></span><span class="fill" style="left:${l}%;width:${w}%;${m.status === 'normal' ? 'opacity:.35' : ''}"></span><span class="lab" style="${lab}">${m.z > 0 ? '+' : ''}${m.z.toFixed(1)}</span></div>`;
+  };
+  document.getElementById('ledger').insertAdjacentHTML('beforeend', A.metrics.map(m => `
+    <div class="lrow"><span class="name">${nice[m.name] || m.name}<small>${m.n ? m.n + ' ' : ''}${unit[m.name] || 'events per week'}</small></span>
+      ${spark(M.weekly[key[m.name]], m)}
+      <span class="big">${m.value}</span><span class="range mono">${m.lo} – ${m.hi}<br><span style="font-size:11px">median ${m.expected}</span></span>${zbar(m)}</div>`).join(''));
+
+  const LABEL = { unusual: 'Unusual', look: 'Worth a look', normal: 'Normal' };
+  const order = { unusual: 0, look: 1, normal: 2 };
+  const locs = M.locations.slice().sort((a, b) => order[a.v] - order[b.v]);
+  const names = ['Total events', 'Calls', 'Leads', 'Appointments', 'Off-hours share'], idx = [0, 1, 2, 3, 8];
+  document.querySelector('#sites tbody').innerHTML = locs.map(s => {
+    const z = M.siteZ[s.site];
+    const cells = idx.map((k, j) => {
+      const v = z[k]; if (v == null) return `<td class="z na">·</td>`;
+      const m = { name: names[j], z: v };
+      const a = Math.min(Math.abs(v) / 4, 1) * 62, l = Math.abs(v) >= 3 ? 3 : Math.abs(v) >= 2 ? 2 : 1;
+      return `<td class="z${j === 4 ? ' sep' : ''}" data-l="${l}" style="--pc:${colorFor(m)};${Math.abs(v) >= 1 ? `background:color-mix(in srgb, ${colorFor(m)} ${a}%, var(--paper))` : ''}">${v > 0 ? '+' : ''}${v.toFixed(1)}</td>`;
+    }).join('');
+    return `<tr title="${s.note || ''}"><td class="acct">${s.site}<small>${s.n} events</small></td><td><span class="verdict" data-v="${s.v}">${LABEL[s.v]}</span></td>${cells}</tr>`;
+  }).join('');
+})();
+</script>
+</body>
+</html>

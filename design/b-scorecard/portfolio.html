@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relay Scorecard · Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="scorecard.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">Relay <span>Scorecard</span></div>
+    <div class="crumbs">All accounts</div>
+    <div class="ctlrow">
+      <label for="asof">As of <input class="date mono" id="asof" type="text" value="2026-07-27 22:20 UTC" aria-label="As of date"></label>
+      <div class="seg" role="group" aria-label="Window"><button type="button">1d</button><button type="button" aria-pressed="true">7d</button><button type="button">30d</button></div>
+      <div class="seg" role="group" aria-label="Sensitivity"><button type="button">Relaxed</button><button type="button" aria-pressed="true">Normal</button><button type="button">Strict</button></div>
+    </div>
+  </header>
+
+  <div class="summary">
+    <h1>Week ending Jul 27, compared to the 8 weeks before</h1>
+    <div class="counts" id="counts"></div>
+  </div>
+
+  <div class="key">
+    <span>Cells show how far each signal is from usual (robust z-score). ±2 = worth a look, ±3 = unusual.</span>
+    <span><i style="background:color-mix(in srgb,var(--good) 60%,var(--paper))"></i>better than usual</span>
+    <span><i style="background:color-mix(in srgb,var(--bad) 60%,var(--paper))"></i>worse than usual</span>
+    <span><i style="background:color-mix(in srgb,var(--neutral) 60%,var(--paper))"></i>different, neither good nor bad</span>
+    <span><i style="background:var(--paper);box-shadow:inset 0 0 0 1px var(--line)"></i>· not enough data</span>
+  </div>
+
+  <div class="gridwrap">
+    <table class="m" id="grid">
+      <thead>
+        <tr class="grp"><th colspan="2"></th><th class="sep" colspan="4">Volume</th><th class="sep" colspan="3">Outcomes</th><th class="sep" colspan="2">Behaviour</th><th class="sep" colspan="2"></th></tr>
+        <tr><th>Verdict</th><th>Account</th>
+          <th class="sep" style="text-align:right">All</th><th style="text-align:right">Calls</th><th style="text-align:right">Leads</th><th style="text-align:right">Appts</th>
+          <th class="sep" style="text-align:right">Missed</th><th style="text-align:right">Converted</th><th style="text-align:right">No-show</th>
+          <th class="sep" style="text-align:right">Talk time</th><th style="text-align:right">Odd hours</th>
+          <th class="sep">Last 25 weeks</th><th>Sites</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <p class="foot">Rows are sorted by the largest deviation. Each bar in "Last 25 weeks" is that week's verdict (grey normal, amber worth a look, red unusual, outlined = not enough history yet). Each dot in "Sites" is one location's verdict this week. Select a row to open the account.</p>
+</div>
+<script src="../data.js"></script>
+<script>
+(function () {
+  const D = window.RELAY;
+  const LABEL = { unusual: 'Unusual', look: 'Worth a look', normal: 'Normal', insufficient: 'Not enough history', none: 'No activity' };
+  const pol = { 'Total events': 1, 'Calls': 1, 'Leads': 1, 'Appointments': 1, 'Missed-call rate': -1, 'Lead conversion': 1, 'No-show rate': -1, 'Median talk time': 0, 'Off-hours share': 0 };
+  const maxZ = a => Math.max(0, ...a.metrics.filter(m => !m.na).map(m => Math.abs(m.z)));
+  const rank = { unusual: 0, look: 1, normal: 2, insufficient: 3, none: 4 };
+  const list = D.accounts.slice().sort((a, b) => rank[a.verdict] - rank[b.verdict] || maxZ(b) - maxZ(a));
+  const c = {}; list.forEach(a => c[a.verdict] = (c[a.verdict] || 0) + 1);
+  document.getElementById('counts').innerHTML = ['unusual', 'look', 'normal', 'none'].filter(k => c[k]).map(k => `<span><b>${c[k]}</b> ${LABEL[k].toLowerCase()}</span>`).join('');
+
+  const cell = (m, i) => {
+    const sep = [0, 4, 7].includes(i) ? ' sep' : '';
+    if (!m || m.na) return `<td class="z na${sep}" title="Not enough data">·</td>`;
+    const dir = Math.sign(m.z) * pol[m.name];
+    const pc = dir > 0 ? 'var(--good)' : dir < 0 ? 'var(--bad)' : 'var(--neutral)';
+    const a = Math.min(Math.abs(m.z) / 4, 1) * 62;
+    const l = Math.abs(m.z) >= 3 ? 3 : Math.abs(m.z) >= 2 ? 2 : 1;
+    const bg = Math.abs(m.z) >= 1 ? `background:color-mix(in srgb, ${pc} ${a}%, var(--paper));` : '';
+    return `<td class="z${sep}" data-l="${l}" style="--pc:${pc};${bg}" title="${m.name}: ${m.value} vs usual ${m.lo}–${m.hi}"><span class="v">${m.value}</span>${m.z > 0 ? '+' : ''}${m.z.toFixed(1)}</td>`;
+  };
+  const rows = list.map(a => {
+    const cells = a.metrics.length ? a.metrics.map(cell).join('') : Array.from({ length: 9 }, (_, i) => cell(null, i)).join('');
+    const hist = a.hist.split('').map(h => `<i class="${h}"></i>`).join('');
+    const sites = (a.locVerdicts || '').split('').map(v => `<i class="${v}"></i>`).join('');
+    return `<tr style="cursor:pointer" onclick="location.href='account.html'"><td><span class="verdict" data-v="${a.verdict}">${LABEL[a.verdict]}</span></td>
+      <td class="acct">${a.name}<small>${a.industry} · ${a.tz.split('/').pop().replace('_', ' ')}</small></td>${cells}
+      <td class="sep"><span class="hist">${a.verdict === 'none' ? '' : hist}</span></td><td><span class="sites">${sites}</span></td></tr>`;
+  }).join('');
+  document.querySelector('#grid tbody').innerHTML = rows;
+})();
+</script>
+</body>
+</html>

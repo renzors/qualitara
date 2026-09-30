@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relay Brief · Metro Collision</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="brief.css">
+<style>
+  .hours { display: grid; grid-template-columns: repeat(24, 1fr); gap: 3px; height: 80px; align-items: end; }
+  .hours div { position: relative; height: 100%; }
+  .hours .base { position: absolute; bottom: 0; left: 0; right: 0; background: color-mix(in srgb, var(--muted) 28%, transparent); }
+  .hours .now { position: absolute; bottom: 0; left: 30%; right: 30%; background: var(--accent); }
+  .hours .rare { background-image: repeating-linear-gradient(135deg, transparent 0 3px, color-mix(in srgb, var(--muted) 18%, transparent) 3px 4px); }
+  .key { display: flex; gap: 16px; font: var(--t-s) var(--font-head); color: var(--muted); margin-top: 8px; flex-wrap: wrap; }
+  .key i { display: inline-block; width: 10px; height: 10px; margin-right: 6px; vertical-align: -1px; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<header class="masthead"><span><b>Relay Brief</b> · <a href="digest.html">Weekly brief</a> / Metro Collision Centers</span><span>7 days vs 8 weeks · normal sensitivity · as of Jul 27, 22:20 UTC</span></header>
+<main class="page">
+  <p class="kicker">Account brief</p>
+  <div class="verdictline" data-v="look">Worth a look</div>
+  <h1>A normal week for Metro Collision, except that almost no leads converted</h1>
+  <p class="lede">From Monday, July 20 at 6:20pm to Monday, July 27 at 6:20pm New York time, Metro Collision's 15 locations logged 81 calls, leads and appointments. That is inside their usual range of 36 to 102. One signal stood out.</p>
+
+  <aside class="side">
+    <p><b>Why only "worth a look"?</b> 15 leads is a small sample. One conversion out of 15 is far below usual, but the range for a sample this size is wide (10%–59%). If next week is similar, it becomes unusual.</p>
+    <p><b>Leads still open.</b> 14 of the 15 leads are marked open, not lost. Conversions often land days later, so this can recover without anyone acting.</p>
+    <p><b>Compare:</b> <a href="#">last 1 day</a> · <a href="#">last 30 days</a> · <a href="#">as of Jun 3</a></p>
+  </aside>
+
+  <div class="facts">
+    <div><b>81</b>events · usually 69</div>
+    <div><b>33%</b>calls missed · usually 24%</div>
+    <div><b class="bad">7%</b>leads converted · usually 35%</div>
+    <div><b>14m 24s</b>median talk time · usually 13m 24s</div>
+  </div>
+
+  <h2>What changed</h2>
+  <p>Only 1 of 15 new leads converted this week. Over the previous 8 weeks, about a third of leads converted, and the weekly rate never dropped below 29%. Lead volume itself was normal (17 against a usual 16), so fewer conversions are not explained by fewer leads.</p>
+  <figure>
+    <svg id="conv" viewBox="0 0 660 210" role="img" aria-label="Weekly lead conversion rate, Feb to Jul 2026"></svg>
+    <figcaption>Share of leads converted each week. The shaded box marks the 8 baseline weeks and their usual range. The last point is this week.</figcaption>
+  </figure>
+
+  <h2>What stayed normal</h2>
+  <ul class="plain" id="normal"></ul>
+
+  <h2>Where</h2>
+  <p>The drop is spread across sites rather than coming from one location. Two sites look unusual on their own, but for different reasons and with very few events:</p>
+  <ul class="plain">
+    <li><span><b>Site M</b>: 4 appointments against a usual 0 or 1, and 8 events in total against a usual 4</span><span class="num">8 events</span><span class="tag" data-v="unusual">Unusual</span></li>
+    <li><span><b>Site J</b>: 2 of its 4 events came after 8pm</span><span class="num">4 events</span><span class="tag" data-v="unusual">Unusual</span></li>
+    <li><span><b>Sites G and I</b>: 2 appointments each against a usual 0</span><span class="num">4–5 events</span><span class="tag" data-v="look">Worth a look</span></li>
+    <li><span><b>Site B</b>: 1 of its 8 events came after 8pm</span><span class="num">8 events</span><span class="tag" data-v="look">Worth a look</span></li>
+  </ul>
+  <p>The other 10 sites were normal.</p>
+
+  <h2>When</h2>
+  <p>Activity followed the usual daily rhythm. It peaks around midday and is almost silent between 8pm and 3am New York time. Just 1 of 81 events landed in those hours.</p>
+  <figure>
+    <div class="hours" id="hours"></div>
+    <div class="hourlabels" id="hl"></div>
+    <div class="key"><span><i style="background:color-mix(in srgb,var(--muted) 28%,transparent)"></i>usual share by hour</span><span><i style="background:var(--accent)"></i>this week</span><span><i class="rare" style="background-color:transparent;outline:1px solid var(--rule)"></i>unusual hours</span></div>
+  </figure>
+
+  <h2>About the data</h2>
+  <p>4 duplicate events were removed before counting. 6% of this week's events have no recorded outcome, so they are left out of the rates. On June 3 the account logged 805 events in one day. That day is outside this comparison, and the method is built so a day like that does not distort what counts as usual.</p>
+
+  <h2>Summary for the ticket</h2>
+  <div class="ticket" id="ticket">Metro Collision Centers, week of Jul 20–27 (New York time)
+Overall activity was normal: 81 events vs a usual 69.
+One change: only 1 of 15 new leads converted (7%), against a usual ~35%. 14 of those leads are still open.
+Calls, appointments, missed-call rate and talk time were all within their usual ranges.
+Sites M and J had small, unusual changes (8 and 4 events).</div>
+  <div class="actions"><button class="btn" type="button">Copy summary</button><button class="btn ghost" type="button">Copy link to this brief</button></div>
+</main>
+<script src="../data.js"></script>
+<script>
+(function () {
+  const M = window.RELAY.metro, A = window.RELAY.accounts.find(a => a.id === 6);
+  // conversion chart
+  const s = M.conversion, W = 660, H = 210, L = 40, R = 16, T = 12, B = 30;
+  const x = i => L + i * (W - L - R) / (s.length - 1), y = v => T + (1 - v / 60) * (H - T - B);
+  let g = '';
+  [0, 20, 40, 60].forEach(v => g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" style="stroke:var(--rule)"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end" style="fill:var(--muted);font:11px var(--font-data)">${v}%</text>`);
+  const n = s.length;
+  g += `<rect x="${x(n - 9)}" y="${y(59)}" width="${x(n - 2) - x(n - 9)}" height="${y(10) - y(59)}" style="fill:color-mix(in srgb, var(--accent) 10%, transparent)"/>`;
+  g += `<text x="${x(n - 9) + 4}" y="${y(59) + 14}" style="fill:var(--accent);font:600 11px var(--font-head)">usual range 10–59%</text>`;
+  g += `<polyline points="${s.map((v, i) => x(i).toFixed(1) + ',' + y(v).toFixed(1)).join(' ')}" style="fill:none;stroke:var(--ink);stroke-width:1.6"/>`;
+  g += `<circle cx="${x(n - 1)}" cy="${y(s[n - 1])}" r="5" style="fill:var(--bad)"/><text x="${x(n - 1) - 8}" y="${y(s[n - 1]) + 4}" text-anchor="end" style="fill:var(--bad);font:600 12px var(--font-data)">7%</text>`;
+  [['Feb 9', 0], ['Apr 6', 8], ['Jun 1', 16], ['Jul 27', n - 1]].forEach(([t, i]) => g += `<text x="${x(i)}" y="${H - 8}" text-anchor="${i === n - 1 ? 'end' : i === 0 ? 'start' : 'middle'}" style="fill:var(--muted);font:11px var(--font-data)">${t}</text>`);
+  document.getElementById('conv').innerHTML = g;
+
+  // normal list
+  const nice = { 'Total events': 'All activity', 'Off-hours share': 'Activity at unusual hours', 'Median talk time': 'Median talk time' };
+  document.getElementById('normal').innerHTML = A.metrics.filter(m => m.status === 'normal').map(m =>
+    `<li><span>${nice[m.name] || m.name}</span><span class="num">${m.value}</span><span class="num">usual ${m.lo}–${m.hi}</span></li>`).join('');
+
+  // hours
+  const bt = M.baseHours.reduce((a, b) => a + b, 0);
+  const now = Array(24).fill(0); M.heat.forEach(r => r.forEach((c, h) => now[h] += c));
+  const nt = now.reduce((a, b) => a + b, 0);
+  const mx = Math.max(...M.baseHours.map(v => v / bt), ...now.map(v => v / nt));
+  document.getElementById('hours').innerHTML = M.baseHours.map((b, h) => `<div class="${b / bt < .02 ? 'rare' : ''}" title="${h}:00 — usual ${Math.round(100 * b / bt)}%, this week ${Math.round(100 * now[h] / nt)}%"><span class="base" style="height:${100 * b / bt / mx}%"></span><span class="now" style="height:${100 * now[h] / nt / mx}%"></span></div>`).join('');
+  document.getElementById('hl').innerHTML = Array.from({ length: 24 }, (_, h) => `<span>${h % 3 === 0 ? (h === 0 ? '12a' : h === 12 ? '12p' : h > 12 ? (h - 12) + 'p' : h + 'a') : ''}</span>`).join('');
+})();
+</script>
+</body>
+</html>

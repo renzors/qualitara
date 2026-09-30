@@ -1,0 +1,21 @@
+# .NET
+bin/
+obj/
+*.user
+.vs/
+
+# SQLite database created by the API on first run (delete to re-seed)
+*.db
+*.db-shm
+*.db-wal
+
+# Node / Angular
+node_modules/
+src/web/dist/
+src/web/.angular/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relay Queue · Metro Collision</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="queue.css">
+</head>
+<body data-selected="6">
+<div class="app">
+  <header class="bar">
+    <div class="brand">Activity check <small>Relay · Customer Success</small></div>
+    <div class="controls">
+      <label class="ctl" for="asof"><span>As of</span><select id="asof"><option>Latest · Jul 27, 2026 22:20 UTC</option><option>Pick a date…</option></select></label>
+      <label class="ctl" for="win"><span>Window</span><select id="win"><option>1 day</option><option selected>7 days</option><option>30 days</option></select></label>
+      <label class="ctl" for="sens"><span>Sensitivity</span><select id="sens"><option>Relaxed</option><option selected>Normal</option><option>Strict</option></select></label>
+    </div>
+  </header>
+  <div class="split">
+    <nav class="queue" id="queue" aria-label="Accounts by verdict">
+      <div class="q-head"><input id="search" type="search" placeholder="Find an account" aria-label="Find an account"></div>
+    </nav>
+    <main class="pane" id="detail"></main>
+  </div>
+</div>
+<script src="../data.js"></script>
+<script src="queue.js"></script>
+</body>
+</html>

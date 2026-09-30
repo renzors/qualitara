@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relay Monitor · Metro Collision</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&family=Red+Hat+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="monitor.css">
+</head>
+<body>
+<div class="shell">
+  <header class="top">
+    <div class="brand"><a href="wall.html" style="color:inherit;text-decoration:none">Relay <i>Monitor</i></a></div>
+    <div class="status"><span class="lamp" data-v="look">Metro Collision Centers · worth a look</span><span style="color:var(--muted)">Automotive · 15 sites · New York</span></div>
+    <div class="right">
+      <button class="chip" type="button">1D</button><button class="chip" type="button" aria-pressed="true">7D</button><button class="chip" type="button">30D</button>
+      <button class="chip" type="button">Relaxed</button><button class="chip" type="button" aria-pressed="true">Normal</button><button class="chip" type="button">Strict</button>
+    </div>
+  </header>
+
+  <section class="panel big-chart">
+    <div class="panel-head"><h2>Events per week</h2><span class="lbl">log scale · band = usual range · drag the handle to replay</span></div>
+    <svg id="big" viewBox="0 0 1000 250" role="img" aria-label="Weekly events for Metro Collision Centers, Feb to Jul 2026, log scale"></svg>
+    <div class="scrub-meta"><span>Baseline <b>May 25 → Jul 20</b> (8 weeks)</span><span>Window <b>Jul 20 6:20pm → Jul 27 6:20pm EDT</b></span><span><a href="#">Jump to Jun 3 spike</a></span></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><h2>Signals</h2><span class="lbl">needle = this week · shaded = usual range</span></div>
+    <div class="grid-3" id="gauges"></div>
+  </section>
+
+  <div class="grid-2">
+    <section class="panel">
+      <div class="panel-head"><h2>Sites</h2><span class="lbl">bars = distance from usual · all, calls, leads, appts, odd hours</span></div>
+      <div class="sites" id="sites"></div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><h2>Local hour × day</h2><span class="lbl">this week · dashed = unusual hours (8pm–3am)</span></div>
+      <div class="heat" id="heat"></div>
+      <p class="note">1 of 81 events fell in unusual hours (usual 2%). 4 duplicates removed · 6% of events have no outcome.</p>
+    </section>
+  </div>
+</div>
+<script src="../data.js"></script>
+<script>
+(function () {
+  const D = window.RELAY, M = D.metro, A = D.accounts.find(a => a.id === 6);
+
+  // big chart, log scale
+  const s = M.weekly.all, n = s.length, W = 1000, H = 250, L = 44, R = 14, T = 14, B = 40;
+  const lg = v => Math.log10(v), y0 = lg(30), y1 = lg(1000);
+  const x = i => L + i * (W - L - R) / (n - 1), y = v => T + (1 - (lg(v) - y0) / (y1 - y0)) * (H - T - B);
+  let g = '';
+  [30, 50, 100, 300, 1000].forEach(v => g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" style="stroke:var(--grid)"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end" style="fill:var(--muted);font:11px var(--font-data)">${v}</text>`);
+  // rolling band (median ± spread of prior 8 weeks) for weeks with ≥4 prior weeks
+  const med = a => { const q = a.slice().sort((p, r) => p - r); const m = q.length >> 1; return q.length % 2 ? q[m] : (q[m - 1] + q[m]) / 2; };
+  const top = [], bot = [];
+  for (let i = 4; i < n; i++) { const b = s.slice(Math.max(0, i - 8), i), m = med(b), mad = med(b.map(v => Math.abs(v - m))), sp = Math.max(1.4826 * mad, Math.sqrt(m), 1); top.push([x(i), y(m + 2 * sp)]); bot.push([x(i), y(Math.max(31, m - 2 * sp))]); }
+  g += `<path d="M${top.map(p => p.join(',')).join(' L')} L${bot.reverse().map(p => p.join(',')).join(' L')} Z" style="fill:color-mix(in srgb, var(--accent) 16%, transparent)"/>`;
+  g += `<rect x="${x(n - 1) - 12}" y="${T}" width="24" height="${H - T - B}" style="fill:color-mix(in srgb, var(--accent) 10%, transparent)"/>`;
+  g += `<polyline points="${s.map((v, i) => x(i).toFixed(1) + ',' + y(v).toFixed(1)).join(' ')}" style="fill:none;stroke:var(--text);stroke-width:1.5"/>`;
+  s.forEach((v, i) => g += `<circle cx="${x(i)}" cy="${y(v)}" r="${i === n - 1 ? 5 : 2.5}" style="fill:${i === 17 ? 'var(--red)' : i === n - 1 ? 'var(--amber)' : 'var(--text)'}"/>`);
+  g += `<text x="${x(17) + 10}" y="${y(881) + 4}" style="fill:var(--red);font:500 12px var(--font-data)">881 · incl. 805 on Jun 3</text>`;
+  const labels = [['Feb 9', 0], ['Mar 9', 4], ['Apr 6', 8], ['May 4', 12], ['Jun 1', 16], ['Jul 6', 21], ['Jul 27', 24]];
+  labels.forEach(([t, i]) => g += `<text x="${x(i)}" y="${H - 22}" text-anchor="${i === 24 ? 'end' : 'middle'}" style="fill:var(--muted);font:11px var(--font-data)">${t}</text>`);
+  // scrubber track
+  g += `<rect x="${L}" y="${H - 10}" width="${W - L - R}" height="3" style="fill:var(--grid)"/>`;
+  g += `<rect x="${x(n - 9)}" y="${H - 10}" width="${x(n - 2) - x(n - 9)}" height="3" style="fill:color-mix(in srgb, var(--accent) 50%, transparent)"/>`;
+  g += `<rect x="${x(n - 2)}" y="${H - 10}" width="${x(n - 1) - x(n - 2)}" height="3" style="fill:var(--accent)"/>`;
+  g += `<rect x="${x(n - 1) - 2}" y="${H - 16}" width="4" height="15" rx="1" style="fill:var(--accent)"/>`;
+  document.getElementById('big').innerHTML = g;
+
+  // gauges
+  const nice = { 'Total events': 'All events', 'Off-hours share': 'Odd-hours share', 'Median talk time': 'Talk time (median)' };
+  const num = v => v.includes('m ') ? (+v.split('m ')[0] * 60 + parseInt(v.split('m ')[1])) : parseFloat(v);
+  document.getElementById('gauges').innerHTML = A.metrics.map(m => {
+    const v = num(m.value), lo = num(m.lo), hi = num(m.hi), max = Math.max(v, hi) * 1.25 || 1, p = q => Math.min(100, q / max * 100);
+    const dir = m.status === 'normal' ? '' : m.pol > 0 ? ' · better' : m.pol < 0 ? ' · worse' : '';
+    return `<div class="gauge" data-v="${m.status}"><div class="row"><span class="lbl">${nice[m.name] || m.name}</span><span class="lbl" style="color:var(--lc)">${m.status === 'normal' ? 'normal' : m.status === 'look' ? 'worth a look' : 'unusual'}${dir}</span></div>
+      <div class="row"><span class="val">${m.value}</span><span class="usual">usual ${m.lo}–${m.hi}${m.n ? ' · n=' + m.n : ''}</span></div>
+      <div class="meter"><span class="track"></span><span class="band" style="left:${p(lo)}%;width:${p(hi) - p(lo)}%"></span><span class="needle" style="left:calc(${p(v)}% - 1px)"></span></div></div>`;
+  }).join('');
+
+  // sites: one bar per signal, height = distance from usual
+  const order = { unusual: 0, look: 1, normal: 2 };
+  document.getElementById('sites').innerHTML = M.locations.slice().sort((a, b) => order[a.v] - order[b.v]).map(st => {
+    const z = M.siteZ[st.site].filter((_, i) => [0, 1, 2, 3, 8].includes(i));
+    const bars = z.map((v, i) => { const h = Math.min(Math.abs(v), 4) / 4 * 8; const col = Math.abs(v) >= 3 ? 'var(--red)' : Math.abs(v) >= 2 ? 'var(--amber)' : 'var(--muted)'; return `<rect x="${i * 20 + 3}" y="${v >= 0 ? 9 - h : 9}" width="14" height="${Math.max(h, 1)}" style="fill:${col}"/>`; }).join('');
+    return `<div class="site" data-v="${st.v}" title="${st.note || 'Normal'}"><span class="top2"><span>${st.site.replace('Site ', '')}</span><span class="lamp" data-v="${st.v}"></span></span>
+      <svg viewBox="0 0 100 18" preserveAspectRatio="none" aria-hidden="true"><line x1="0" x2="100" y1="9" y2="9" style="stroke:var(--grid)"/>${bars}</svg><small>${st.n} events this week</small></div>`;
+  }).join('');
+
+  // heat
+  const days = [1, 2, 3, 4, 5, 6, 0], dn = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const bt = M.baseHours.reduce((a, b) => a + b, 0), rare = M.baseHours.map(b => b / bt < .02);
+  const hm = Math.max(...M.heat.flat());
+  let h = '<span></span>' + Array.from({ length: 24 }, (_, i) => `<span style="text-align:center">${i % 3 ? '' : i}</span>`).join('');
+  days.forEach(d => { h += `<span>${dn[d]}</span>` + M.heat[d].map((c, i) => `<span class="c${rare[i] ? ' rare' : ''}" style="${c ? `background:color-mix(in srgb, var(--accent) ${20 + 80 * c / hm}%, var(--grid))` : ''}" title="${dn[d]} ${i}:00 · ${c}"></span>`).join(''); });
+  document.getElementById('heat').innerHTML = h;
+})();
+</script>
+</body>
+</html>

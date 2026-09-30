@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relay Brief · Week of Jul 27</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="brief.css">
+</head>
+<body>
+<header class="masthead"><span><b>Relay Brief</b> · Customer Success</span><span>20 accounts · data through Mon, Jul 27, 2026</span></header>
+<main class="page">
+  <p class="kicker">Weekly activity brief</p>
+  <h1>One account looks unusual this week, and seven are worth a look</h1>
+
+  <div class="madlib">Showing the
+    <select id="win" aria-label="Window"><option>last day</option><option selected>last 7 days</option><option>last 30 days</option></select>
+    up to <select id="asof" aria-label="As of"><option selected>Jul 27, 22:20 UTC (latest data)</option><option>another date…</option></select>,
+    compared with the 8 weeks before, at
+    <select id="sens" aria-label="Sensitivity"><option>relaxed</option><option selected>normal</option><option>strict</option></select> sensitivity.
+  </div>
+
+  <p class="lede">Most accounts had an ordinary week. The flags below are mostly <em>good</em> news: more leads and appointments than usual. The two that need attention involve fewer conversions and activity at odd hours.</p>
+
+  <aside class="side">
+    <p><b>How to read this.</b> Each account is compared only with its own recent history, never with other businesses. "Usual" is the range it stayed in across the previous 8 weeks.</p>
+    <p><b>Small accounts.</b> An account with fewer than 10 events a week can swing a lot on a single busy evening. The brief says so when it matters.</p>
+    <p><b>Timestamps</b> are shown in each account's own local time.</p>
+  </aside>
+
+  <h2 data-v="unusual"><span>Unusual</span><span class="count">1</span></h2>
+  <div id="unusual"></div>
+  <h2><span>Worth a look</span><span class="count">7</span></h2>
+  <div id="look"></div>
+  <h2><span>Normal</span><span class="count">11</span></h2>
+  <ul class="normals" id="normal"></ul>
+  <h2><span>Can't assess</span><span class="count">1</span></h2>
+  <div class="entry" data-v="none"><h3><span class="tag">No activity</span><a href="#">Quiet Harbor Spa</a><small>Personal Care · Los Angeles</small></h3>
+    <p>No calls, leads or appointments since the account was created on Dec 4, 2025. Check whether their integration was ever connected.</p></div>
+</main>
+<script src="../data.js"></script>
+<script>
+(function () {
+  const D = window.RELAY;
+  const by = id => D.accounts.find(a => a.id === id);
+  const spark = (weeks, v) => {
+    const w = weeks.slice(-12), max = Math.max(...w, 1), W = 64, H = 14;
+    const pts = w.map((n, i) => `${(i * (W - 4) / (w.length - 1) + 2).toFixed(1)},${(H - 2 - n / max * (H - 4)).toFixed(1)}`).join(' ');
+    const last = pts.split(' ').pop().split(',');
+    return `<svg class="wordspark" viewBox="0 0 ${W} ${H}" aria-hidden="true"><polyline points="${pts}" style="fill:none;stroke:var(--muted);stroke-width:1.2"/><circle cx="${last[0]}" cy="${last[1]}" r="2.4" data-v="${v}" style="fill:var(--c)"/></svg>`;
+  };
+  const place = a => a.tz.split('/').pop().replace('_', ' ');
+  const text = {
+    16: '<span class="bad">4 of its 9 events</span> this week happened between 5pm and 4am local time, when the shop usually has almost none (about 6%). <span class="caveat">Only 9 events, so a single late evening could explain it.</span>',
+    6: 'Lead conversion fell to <span class="bad">1 of 15 leads (7%)</span>, against a usual 35%. Call and appointment volume was normal. Sites J and M stand out on their own, but each had 8 or fewer events.',
+    7: '<span class="good">6 appointments</span> were set, against a usual 2 (range 0–4). Calls and leads were normal.',
+    11: '3 of 14 events (21%) came at unusual hours, against a usual 5%. Everything else was normal.',
+    19: '<span class="good">10 calls</span> against a usual 5, which lifted total activity to 14 (usually 8).',
+    4: '<span class="good">11 new leads</span> against a usual 5 or 6. Conversion held steady.',
+    2: '<span class="good">12 new leads</span> against a usual 6 or 7. The missed-call rate was slightly better than usual.',
+    13: '<span class="good">4 new leads</span> against a usual 1 or 2. It is a small account, so this is a modest change.'
+  };
+  const entry = (id, v) => { const a = by(id); return `<div class="entry" data-v="${v}"><h3><span class="tag">${v === 'unusual' ? 'Unusual' : a.reasons[0].pol > 0 ? 'Good news' : a.reasons[0].pol < 0 ? 'Needs attention' : 'Different'}</span>
+    <a href="${id === 6 ? 'account.html' : '#'}">${a.name}</a><small>${a.industry} · ${place(a)} · ${a.recent} events ${spark(a.weeks, v)}</small></h3><p>${text[id]}</p></div>`; };
+  document.getElementById('unusual').innerHTML = entry(16, 'unusual');
+  document.getElementById('look').innerHTML = [6, 11, 7, 19, 4, 2, 13].map(id => entry(id, 'look')).join('');
+  document.getElementById('normal').innerHTML = D.accounts.filter(a => a.verdict === 'normal').map(a => `<li>${a.name}<span>${a.recent} / ~${Math.round(a.expected)}</span></li>`).join('');
+})();
+</script>
+</body>
+</html>

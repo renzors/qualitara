@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Activity Check Directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Martian+Mono:wght@400&display=swap">
+<style>
+/* Layout: one reading column; four direction blocks, each with its two screens as links and a short verdict on fit. */
+:root {
+  --paper: #F7F8FA; --card: #FFFFFF; --ink: #161B24; --muted: #5E6776; --line: #E1E5EB; --accent: #2F5BD3;
+  --font-body: "Hanken Grotesk", system-ui, sans-serif; --font-mono: "Martian Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { color-scheme: dark; --paper: #10141A; --card: #171C24; --ink: #E6EAF0; --muted: #9AA3B1; --line: #28303C; --accent: #8EA8FF; } }
+:root[data-theme="dark"] { color-scheme: dark; --paper: #10141A; --card: #171C24; --ink: #E6EAF0; --muted: #9AA3B1; --line: #28303C; --accent: #8EA8FF; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.6 var(--font-body); padding: 48px 16px 80px; }
+main { max-width: 860px; margin: 0 auto; display: grid; gap: 28px; }
+h1 { font-size: 34px; line-height: 1.15; margin: 0; letter-spacing: -.02em; text-wrap: balance; }
+h2 { font-size: 21px; margin: 0; }
+p { margin: 0; max-width: 66ch; }
+.muted { color: var(--muted); }
+.mono { font-family: var(--font-mono); font-size: 12px; }
+.dir { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 20px 22px; display: grid; gap: 12px; }
+.dir header { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; }
+.dir header .mono { color: var(--muted); }
+.links { display: flex; flex-wrap: wrap; gap: 8px; }
+.links a { display: inline-flex; gap: 8px; align-items: center; padding: 6px 12px; border: 1px solid var(--line); border-radius: 6px; color: var(--ink); text-decoration: none; font-weight: 500; font-size: 14px; }
+.links a:hover { border-color: var(--accent); color: var(--accent); }
+.links a::after { content: "→"; color: var(--accent); }
+.pc { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px 24px; font-size: 14px; }
+.pc b { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.pc ul { margin: 4px 0 0; padding-left: 18px; }
+.swatches { display: flex; gap: 4px; }
+.swatches i { width: 16px; height: 16px; border-radius: 3px; display: inline-block; border: 1px solid var(--line); }
+.rec { border-left: 3px solid var(--accent); padding: 4px 0 4px 18px; display: grid; gap: 10px; }
+ol, ul { margin: 0; }
+li + li { margin-top: 4px; }
+</style>
+</head>
+<body>
+<main>
+  <div style="display:grid;gap:10px">
+    <p class="mono muted">Relay · activity check · design exploration</p>
+    <h1>Four ways to answer “is this account’s activity normal?”</h1>
+    <p class="muted">Every screen uses the real seed data, run through an approximation of the SPEC engine: the 7 days to Jul 27, 2026 22:20 UTC against the 8 weeks before, at normal sensitivity. Each direction has a list screen and a detail screen for Metro Collision Centers (15 sites, “worth a look”).</p>
+  </div>
+
+  <section class="dir">
+    <header><h2>A · Queue</h2><span class="mono">IBM Plex · light + dark · split pane</span></header>
+    <p>A support inbox. Accounts are grouped by verdict on the left and the selected account opens on the right. The agent works top to bottom and never loses the list.</p>
+    <div class="links"><a href="a-queue/index.html">Triage (Old Town Barbers open)</a><a href="a-queue/account.html">Metro Collision open</a></div>
+    <div class="pc"><div><b>Strong at</b><ul><li>Fastest path from a ticket to an answer</li><li>Verdict sentence and “Copy summary” sit up top</li><li>Most familiar pattern for CS teams</li></ul></div><div><b>Weak at</b><ul><li>No portfolio-wide pattern view</li><li>History is a secondary card</li></ul></div></div>
+  </section>
+
+  <section class="dir">
+    <header><h2>B · Scorecard</h2><span class="mono">Geist · light + dark · matrix</span></header>
+    <p>A spreadsheet of accounts × signals. Each cell shows the signed distance from usual, coloured by whether the change is good, bad or neutral. The detail screen is a ledger: one row per signal, each with its history, usual range and distance bar.</p>
+    <div class="links"><a href="b-scorecard/portfolio.html">Portfolio matrix</a><a href="b-scorecard/account.html">Metro Collision ledger</a></div>
+    <div class="pc"><div><b>Strong at</b><ul><li>Shows everything at once, including near-misses</li><li>Shows which signal drives each verdict</li><li>Site × signal matrix handles 15-site accounts well</li></ul></div><div><b>Weak at</b><ul><li>Z-scores need explaining to non-analysts</li><li>Dense on phones; relies on horizontal scroll</li></ul></div></div>
+  </section>
+
+  <section class="dir">
+    <header><h2>C · Brief</h2><span class="mono">Schibsted Grotesk + Literata · light + dark · document</span></header>
+    <p>A written report. The list is a weekly digest in plain sentences. The account page reads like an analyst’s note, with a headline verdict, what changed, where and when, and a summary ready to paste into a ticket. Controls are phrased as a sentence.</p>
+    <div class="links"><a href="c-brief/digest.html">Weekly digest</a><a href="c-brief/account.html">Metro Collision brief</a></div>
+    <div class="pc"><div><b>Strong at</b><ul><li>Easiest for non-technical agents and customers</li><li>States caveats (small samples, open leads) in context</li><li>Ticket text comes built in</li></ul></div><div><b>Weak at</b><ul><li>Needs good sentence templates in the API</li><li>Slower to scan 20+ accounts</li></ul></div></div>
+  </section>
+
+  <section class="dir">
+    <header><h2>D · Monitor</h2><span class="mono">Barlow Condensed + Red Hat Mono · dark only · timeline</span></header>
+    <p>A control-room wall where time runs left to right everywhere. The list shows each account’s weekly verdict history, and a replay scrubber sets “as of”. The account page shows a log-scale timeline with a rolling usual band, signal gauges and a site grid.</p>
+    <div class="links"><a href="d-monitor/wall.html">Verdict history wall</a><a href="d-monitor/account.html">Metro Collision monitor</a></div>
+    <div class="pc"><div><b>Strong at</b><ul><li>Makes the replay (as-of) feature central</li><li>Shows recurring flags, e.g. accounts that trip every few weeks</li><li>Log scale keeps the Jun 3 spike readable</li></ul></div><div><b>Weak at</b><ul><li>Dark-only; heavier visual tone</li><li>Rolling history is costly: one engine run per week per account</li></ul></div></div>
+  </section>
+
+  <section class="rec">
+    <h2>Recommendation</h2>
+    <p>Use <b>A’s split-pane queue</b> as the frame, since it matches how CS picks up tickets. Build the detail pane from <b>B’s signal ledger</b> (history + range + distance per row) with <b>C’s headline sentence and ticket summary</b> on top. Keep <b>D’s scrubber</b> as the as-of control. Hold the verdict-history wall for v2.</p>
+  </section>
+
+  <section class="rec">
+    <h2>Found while building these</h2>
+    <ul>
+      <li><b>Small samples over-flag.</b> Old Town Barbers is “unusual” because 4 of its 9 events came in the evening, and Site J because 2 of 4 did. The off-hours and per-site checks need the same n ≥ 10 minimum that outcome rates have.</li>
+      <li><b>Flags are frequent over time.</b> Across 21 assessable weeks, 10 of 19 accounts come out “unusual” 3 or more times, and Willow Creek 6 times (see D’s wall). That points to a looser default threshold or a 2-week persistence rule.</li>
+      <li><b>Volume bands round badly.</b> “12 leads vs usual 1–12” reads as normal. Bands need floor/ceil rounding, which the mockups already use.</li>
+      <li><b>Open leads mask conversion.</b> Metro’s 7% conversion counts 14 open leads that may convert later. Consider excluding leads younger than N days from the conversion rate.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>

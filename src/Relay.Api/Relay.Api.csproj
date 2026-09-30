@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Relay.Domain\Relay.Domain.csproj" />
+    <ProjectReference Include="..\Relay.Data\Relay.Data.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- The SQLite file is data, not source: keep dotnet watch from restarting on writes. -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);relay.db*</DefaultItemExcludes>
+  </PropertyGroup>
+
+</Project>
